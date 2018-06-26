@@ -2,7 +2,9 @@
 
 
 markets	<- readOGR(MARKETS , "market_sample_abr18")
-feeder_sample	<- readOGR(file.path(ROADS, "Sample"), "feeder_sample_abr18", pointDropZ = T)
+feeder_sample	<- readOGR(file.path(TEMP), "feeder_sample", pointDropZ = T)
+district_rd		<- readOGR(ROADS, "District_Road_Class_1")
+national_rd		<- readOGR(ROADS, "National_rds")
 
 
 tomato_merge <- read.csv(file.path(TEMP, "prices.csv"), header = T)
@@ -15,32 +17,47 @@ markets$foo <- rnorm(length(markets@data[,1]), mean = 1000, sd = 200)
 pal_pric <- colorNumeric(c("blue", "red"), 
                     domain = markets$tomato)
 
-pal_feed <- colorNumeric(c("green", "chocolate4"), 
-                    domain = c(0,1))
+pal_feed <- colorNumeric(c("limegreen", "gold", "firebrick"), 
+                    domain = feeder_sample@data$feeder_sta)
 
 #CartoDB.VoyagerNoLabels, OpenMapSurfer.AdminBounds, JusticeMap.white
 #Esri.WorldImagery
 
 leaflet() %>%
- # addProviderTiles("Esri.WorldImagery") %>% 
-  addProviderTiles("Esri.WorldGrayCanvas") %>% 
+  addProviderTiles("Esri.WorldImagery") %>% 
+ # addTiles(group = "OSM (default)") %>%
+
+ # addProviderTiles("Esri.WorldGrayCanvas") %>% 
  # addProviderTiles("CartoDB.Positron") %>% 
+ #addProviderTiles("CartoDB.DarkMatter") %>% 
+  
+  
+  # addPolylines(data=district_rd,
+  #              color = "blue",
+  #              opacity = 1.0,
+  #              weight = 1) %>%
+  # 
+  # addPolylines(data=national_rd,
+  #              color = "blue",
+  #              opacity = 1.0,
+  #              weight = 1) %>%
+  
   addPolygons(data=districts, 
               color = "black",
               fillColor = "grey",
               weight = 1, 
               smoothFactor = 0.5,
-              opacity = 1.0, 
+              opacity = 0, 
               fillOpacity = 0.55) %>%
   
-  addCircles(data=markets,
+  addCircleMarkers(data=markets,
              weight = 1,
-             radius = 180,
+             radius = 2,
              color = "firebrick",
              fillOpacity = .9) %>%
   
   addPolylines(data=feeder_sample,
-               color = "forestgreen",
+               color = ~pal_feed(feeder_sta),
                opacity = 1.0,
                weight = 2) %>%
   
