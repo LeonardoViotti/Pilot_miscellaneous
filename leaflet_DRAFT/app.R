@@ -12,7 +12,14 @@ library(leaflet)
 #### Load data ####
 
 #markets	<- readOGR(~ , "market_sample_abr18")
+markets	<- readOGR(MARKETS , "market_sample_abr18")
+feeder_sample	<- readOGR(file.path(ROADS, "Sample"), "feeder_sample_abr18", pointDropZ = T)
+district_rd		<- readOGR(ROADS, "District_Road_Class_1")
+national_rd		<- readOGR(ROADS, "National_rds")
 
+
+#tomato_merge <- read.csv(file.path(TEMP, "prices.csv"), header = T)
+markets <- merge(markets, tomato_merge, by ="market_uid" )
 
 #------------------------------------------------------------------------------#
 #### Data preparing ####
@@ -82,7 +89,7 @@ server <- function(input, output, session) {
                   weight = 1, 
                   smoothFactor = 0.5,
                   opacity = 0.2, 
-                  fillOpacity = 0.55) %>%
+                  fillOpacity = 0.25) %>%
       # Market dots
       addCircleMarkers(data=markets,
                        weight = 1,

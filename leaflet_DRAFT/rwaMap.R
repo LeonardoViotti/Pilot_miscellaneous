@@ -2,10 +2,15 @@
 
 
 markets	<- readOGR(MARKETS , "market_sample_abr18")
-feeder_sample	<- readOGR(file.path(TEMP), "feeder_sample", pointDropZ = T)
+feeder_sample	<- readOGR(file.path(ROADS, "Sample"), "feeder_sample_abr18", pointDropZ = T)
 district_rd		<- readOGR(ROADS, "District_Road_Class_1")
 national_rd		<- readOGR(ROADS, "National_rds")
 
+
+feeder_sample <- merge(feeder_sample, 
+                       rms[, c("feeder_oid", "feeder_status", "completed")],
+                       by.x = "OBJECTID",
+                       by.y = "feeder_oid")
 
 #tomato_merge <- read.csv(file.path(TEMP, "prices.csv"), header = T)
 markets <- merge(markets, tomato_merge, by ="market_uid" )
@@ -18,7 +23,7 @@ pal_pric <- colorNumeric(c("blue", "red"),
                     domain = markets$tomato)
 
 pal_feed <- colorNumeric(c("limegreen", "gold", "firebrick"), 
-                    domain = feeder_sample@data$feeder_sta)
+                    domain = feeder_sample@data$feeder_status)
 
 #CartoDB.VoyagerNoLabels, OpenMapSurfer.AdminBounds, JusticeMap.white
 #Esri.WorldImagery
@@ -57,7 +62,7 @@ leaflet() %>%
              fillOpacity = .9) %>%
   
   addPolylines(data=feeder_sample,
-               color = ~pal_feed(feeder_sta),
+               color = ~pal_feed(feeder_status),
                opacity = 1.0,
                weight = 2) %>%
   
