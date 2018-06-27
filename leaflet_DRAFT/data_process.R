@@ -49,7 +49,7 @@
   #------------------------------------------------------------------------------#
   #### SWITCHES ####
   
-  EXPORT_data = 0
+  EXPORT_data = 1
   
   #------------------------------------------------------------------------------#
   #### 2. FILE PATHS 	####
@@ -200,16 +200,19 @@
   # you could keep the last month for example.
   
   
-  # Market level data
-  tomato_data <- avgPrices[,c("market_uid",
-                              "year_month", 
-                              as.character(prod_list$variable)
-  )]
+  #### CHANGE THIS TO APP ####
+  avgPrices[avgPrices$year_month < 201806 & avgPrices$year_month > 201802, ]
   
+  
+  #### Market level data
+  
+  # Average by market
   tomato_merge <- aggregate( . ~ market_uid,
                              FUN = mean, na.rm = T,
                              na.action=NULL,
                              data = avgPrices)
+  
+  
   
   
   # Above or bellow average var
@@ -217,13 +220,19 @@
   
   
   # Rempove NaNs
-  tomato_merge <- as.data.frame(apply(tomato_merge, 2, function(x) ifelse(is.nan(x), NA, x ) ) )
+  tomato_merge <- as.data.frame(apply(tomato_merge, 
+                                      2, 
+                                      function(x) ifelse(is.nan(x), NA, x ) ) )
   
   # Turn everything to numericagain
-  tomato_merge <- as.data.frame(apply(tomato_merge, 2, function(x) as.numeric(x)) )
+  tomato_merge <- as.data.frame(apply(tomato_merge, 
+                                      2, 
+                                      function(x) as.numeric(x)) )
   
   # Calculate difference from average
-  tomato_diff <- as.data.frame(apply(tomato_merge, 2, function(x){ x - mean(x, na.rm = T)}))
+  tomato_diff <- as.data.frame(apply(tomato_merge, 
+                                     2, 
+                                     function(x){ (x)/ mean(x, na.rm = T)}))
   
   names(tomato_diff) <- paste0("diff_", names(tomato_diff))
   
@@ -251,26 +260,26 @@
     write.table(tomato_merge, 
                 file.path(TEMP, "prices.csv"),
                 sep = ",")
-  
-    writeOGR(markets,
-             dsn=file.path(TEMP, "markets.shp"),
-             layer="sample_markets",
-             overwrite_layer=T,
-             driver="ESRI Shapefile")
-    
-    writeOGR(districts,
-             dsn=file.path(TEMP, "districts.shp"),
-             layer="districts",
-             overwrite_layer=T,
-             driver="ESRI Shapefile")
-    
-    #### Feeders shape
-    names(feeder_sample) <- strtrim(names(feeder_sample), 10)
-    
-    writeOGR(feeder_sample,
-             dsn=file.path(TEMP, "feeder_sample.shp"),
-             layer="feeder_sample",
-             overwrite_layer=T,
-             driver="ESRI Shapefile")
+    # 
+    # writeOGR(markets,
+    #          dsn=file.path(TEMP, "markets.shp"),
+    #          layer="sample_markets",
+    #          overwrite_layer=T,
+    #          driver="ESRI Shapefile")
+    # 
+    # writeOGR(districts,
+    #          dsn=file.path(TEMP, "districts.shp"),
+    #          layer="districts",
+    #          overwrite_layer=T,
+    #          driver="ESRI Shapefile")
+    # 
+    # #### Feeders shape
+    # names(feeder_sample) <- strtrim(names(feeder_sample), 10)
+    # 
+    # writeOGR(feeder_sample,
+    #          dsn=file.path(TEMP, "feeder_sample.shp"),
+    #          layer="feeder_sample",
+    #          overwrite_layer=T,
+    #          driver="ESRI Shapefile")
     
   }

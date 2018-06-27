@@ -7,7 +7,7 @@ district_rd		<- readOGR(ROADS, "District_Road_Class_1")
 national_rd		<- readOGR(ROADS, "National_rds")
 
 
-tomato_merge <- read.csv(file.path(TEMP, "prices.csv"), header = T)
+#tomato_merge <- read.csv(file.path(TEMP, "prices.csv"), header = T)
 markets <- merge(markets, tomato_merge, by ="market_uid" )
 
 # test variable
