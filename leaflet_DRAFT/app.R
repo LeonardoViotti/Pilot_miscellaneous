@@ -18,11 +18,18 @@ district_rd		<- readOGR(ROADS, "District_Road_Class_1")
 national_rd		<- readOGR(ROADS, "National_rds")
 
 
-#tomato_merge <- read.csv(file.path(TEMP, "prices.csv"), header = T)
-markets <- merge(markets, tomato_merge, by ="market_uid" )
-
 #------------------------------------------------------------------------------#
 #### Data preparing ####
+
+markets <- merge(markets, tomato_merge, by ="market_uid" )
+
+
+feeder_sample <- merge(feeder_sample, 
+                       rms[, c("feeder_oid", "feeder_status", "completed")],
+                       by.x = "OBJECTID",
+                       by.y = "feeder_oid")
+
+
 
 # Order product vector
 prodVec <- as.character(prod_list$variable)
@@ -35,6 +42,11 @@ prodVec <- c(prodVec[grep("tomato", prodVec)[1]],
 #### APP ####
 
 
+# Feeders color pallet
+pal_feed <- colorNumeric(c("forestgreen", "gold1", "firebrick"), 
+                         domain = feeder_sample@data$feeder_status)
+
+
 #### PAGE LAYOUT ####
 ui <- bootstrapPage(
   tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
@@ -43,14 +55,9 @@ ui <- bootstrapPage(
                 selectInput(inputId = "prod_list",
                             label = "Products",
                             choices = prodVec),
-                sliderInput("Time", "Range:",
+                sliderInput("Time", "Year:",
                             min = 2016, max = 2018,
-                            value = c(2017)),
-                checkboxGroupInput("Roads_pane", h3("Feeder roads"),
-                             choices = list("Not constructed" = "NC", 
-                                            "Constructed" = "C",
-                                            "Under construction" = "UC"),
-                             selected = 1)
+                            value = c(2017))
                 
       )
 )
@@ -101,7 +108,27 @@ server <- function(input, output, session) {
                                       paste("Sector:", sector),
                                       paste("Cell:", cell),
                                       sep  = "<br>")
-                       )
+                       ) %>%
+      
+      #### Feeders
+      addPolylines(data=feeder_sample[feeder_sample$feeder_status == 1,],
+                   color = ~pal_feed(feeder_status),
+                   group = "Completed",
+                   opacity = 1.0,
+                   weight = 1.5) %>%
+      addPolylines(data=feeder_sample[feeder_sample$feeder_status == 2,],
+                   color = ~pal_feed(feeder_status),
+                   group = "Under construction",
+                   opacity = 1.0,
+                   weight = 1.5) %>%
+      addPolylines(data=feeder_sample[feeder_sample$feeder_status == 3,],
+                   color = ~pal_feed(feeder_status),
+                   group = "Not started",
+                   opacity = 1.0,
+                   weight = 1.5) %>%
+      addLayersControl(overlayGroups = c("Completed","Under construction", "Not started"),
+                       options = layersControlOptions(collapsed = FALSE),
+                       position = "bottomright") 
   })
   
   # Incremental changes to the map 

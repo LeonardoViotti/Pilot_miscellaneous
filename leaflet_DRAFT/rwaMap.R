@@ -61,10 +61,24 @@ leaflet() %>%
              color = "firebrick",
              fillOpacity = .9) %>%
   
-  addPolylines(data=feeder_sample,
+  addPolylines(data=feeder_sample[feeder_sample$feeder_status == 1,],
                color = ~pal_feed(feeder_status),
+               group = "Completed",
                opacity = 1.0,
                weight = 2) %>%
+  addPolylines(data=feeder_sample[feeder_sample$feeder_status == 2,],
+               color = ~pal_feed(feeder_status),
+               group = "Under construction",
+               opacity = 1.0,
+               weight = 2) %>%
+  addPolylines(data=feeder_sample[feeder_sample$feeder_status == 3,],
+               color = ~pal_feed(feeder_status),
+               group = "Not started",
+               opacity = 1.0,
+               weight = 2) %>%
+  addLayersControl(overlayGroups = c("Completed","Under construction", "Not started"),
+                   options = layersControlOptions(collapsed = FALSE),
+                   position = "bottomright") %>%
   
   addCircles(data=markets, 
              color = ~pal_pric(tomato), 
