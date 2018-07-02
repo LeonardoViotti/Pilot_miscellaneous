@@ -245,10 +245,10 @@
   
   
   #### Road monitoring ####
-  feeder_sample <- merge(feeder_sample, 
-                         rms[, c("feeder_oid", "feeder_status", "completed")],
-                         by.x = "OBJECTID",
-                         by.y = "feeder_oid")
+  # feeder_sample <- merge(feeder_sample, 
+  #                        rms[, c("feeder_oid", "feeder_status", "completed")],
+  #                        by.x = "OBJECTID",
+  #                        by.y = "feeder_oid")
   
   
   #------------------------------------------------------------------------------#

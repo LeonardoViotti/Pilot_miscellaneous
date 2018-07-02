@@ -2,6 +2,7 @@
 #### Load packages ####
 
 library(shiny)
+library(rgdal)
 library(plotly)
 library(rsconnect)
 library(ggmap)
@@ -100,13 +101,14 @@ server <- function(input, output, session) {
       # Market dots
       addCircleMarkers(data=markets,
                        weight = 1,
-                       radius = 2,
-                       color = "firebrick",
+                       radius = 3,
+                       color = "darkgoldenrod3",
                        fillOpacity = .9,
                        popup = ~paste(paste("Market:", market_nam),
                                       paste("District:", district),
                                       paste("Sector:", sector),
                                       paste("Cell:", cell),
+                                      "PRICE NOT AVAILABLE",
                                       sep  = "<br>")
                        ) %>%
       
