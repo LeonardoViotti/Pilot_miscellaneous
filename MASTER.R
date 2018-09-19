@@ -3,15 +3,40 @@
   #	  LVTP - MASTER
   
   #------------------------------------------------------------------------------#
+  #------------------------------------------------------------------------------#
+  #### 1. SETTINGS ####
   
+  # Set warnings 
+  options(warn = 0)
   
+  #### Delete everything already in R memory
+  # (Equivalent to clear all in Stata)
+  rm(list = ls())
   
-  library(rgdal)
-  library(rgeos)
-  library(sp)
+  #-------------------------#
+  #### 1.1 Load packages ####
+
+  library(viridis)
+  
   library(tidyverse)
   library(dplyr)
   library(readstata13)
+  library(ggrepel)
+  library(ggthemes)
+  
+
+  
+  
+  # Spacial
+  library(sp)
+  library(sf)
+  library(rgdal)
+  library(rgeos)
+  library(maptools)
+  library(raster)
+  library(broom)
+  library(ggmap)
+  library(leaflet)
   
   #------------------------------------------------------------------------------#
   #### PATHS ####
