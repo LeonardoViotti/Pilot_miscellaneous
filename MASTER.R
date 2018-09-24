@@ -13,6 +13,14 @@
   # (Equivalent to clear all in Stata)
   rm(list = ls())
   
+  
+  # Inverse hyperbolic sine
+  inv_hsine <- 
+    function(yi){
+      log(yi+sqrt((yi^2)+1))
+    }
+  
+  
   #-------------------------#
   #### 1.1 Load packages ####
 
@@ -56,5 +64,9 @@
   
   #CAD_data file.path(DROPBOX,
   
-  OUT <- file.path(LVTP, "Analysis")
+  OUT <- file.path(LVTP, "Analysis/Outputs")
+  OUT_maps <- file.path(OUT, "Maps")
+  OUT_tables <- file.path(OUT, "Tables")
+  
+  
   

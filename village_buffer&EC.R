@@ -8,6 +8,7 @@
   # Porpuse: Create a X km buffer around corridor and calculate descriptive stats
   # with Establishment census and land cadastre data.
 
+  EXPORT_maps = T
 
   #------------------------------------------------------------------------------#
   #### LOAD AND PROCESS DATA ####
@@ -34,14 +35,21 @@
   # Villages
   villages <- readOGR(file.path(RFR_shapeFiles,"Villages"), "processed_villages_boundaries")
   
+  # Cells
+  cells <- readOGR(file.path(RFR_shapeFiles,"Cells"), "Cell_Boundary_2012")
+  
+  
+  # Remove large villages
+  #villages <- villages[villages@data$Shape_Area < quantile(villages@data$Shape_Area, .99),]
+  
   keep_vill_vars <- c("Code_vill_", 
                       "Village",
                       "District",
                       "Sector_1",
                       "Cellule_1",
-                      "Population")
+                      "Population",
+                      "Shape_Area")
   villages <- villages[,keep_vill_vars]
-  
   
   # EC
   ec <- read.dta13(file.path(EC_data, "2014/2014 Establishment Census.dta"))
@@ -58,6 +66,7 @@
   districts <- spTransform(districts, RwaProj)
   cor	<- spTransform(cor, RwaProj)
   villages <- spTransform(villages, RwaProj)
+  cells <- spTransform(cells, RwaProj)
   nat_roads <- spTransform(nat_roads , RwaProj)
   
   #------------------------------------------------------------------------------#
@@ -82,24 +91,35 @@
   ec$vill_code <- (ec$cell_code*100) + ec$ID5
   
   # Aggregate number of business by village
-  busiVill <- aggregate(key ~ vill_code,
+  ecBusi <- aggregate(key ~ vill_code,
                         data = ec,
                         FUN = length)
   
-  jobsVill <- aggregate(Q21C1 ~ vill_code,
-                        data = ec,
-                        FUN = sum,
-                        na.action = NULL)
+  ecJobs <- aggregate(Q21C1 ~ vill_code,
+                      data = ec,
+                      FUN = sum)
   
-  ecVilldata <- busiVill
-  ecVilldata$N_jobs <- jobsVill$Q20
   
-  names(busiVill) <- c("Code_vill_", "N_busi")
+  ecVill <- ecBusi
+  ecVill$N_jobs <- ecJobs$Q21C1
+  
+  names(ecVill) <- c("Code_vill_", "N_busi", "N_jobs")
+  
+  
+  #### Remove data from large villages ####
+  large_vills <- 
+    #villages$Code_vill_[villages@data$Shape_Area > quantile(villages@data$Shape_Area, .99975)]
+    villages$Code_vill_[villages@data$Shape_Area > 90e+06]
+  
+  
+  ecVill$N_busi[ecVill$Code_vill_ %in% large_vills] <- NA
+  ecVill$N_jobs[ecVill$Code_vill_ %in% large_vills] <- NA
+  
   
   #------------------------------------------------------------------------------#
   #### BUSINESS IN VILL BUFFER ####
   
-  villages <- merge(villages, busiVill, by = "Code_vill_")
+  villages <- merge(villages, ecVill, by = "Code_vill_")
   
   
   #------------------------------------------------------------------------------#
@@ -175,11 +195,20 @@
   # Aggregate number of employes per village 
   
   
+  #------------------------------------------------------------------------------#
+  #### CELL BUFFER ####
+  
+  cell.buff <- subset(cells,
+                      gIntersects(cells,
+                                  gUnaryUnion(cor.buf05),
+                                  byid = T) %>% as.logical)
   
   #------------------------------------------------------------------------------#
   #### ______MAPS_______ ####
+
   
-  #### Reproject
+  #------------------------------------------------------------------------------#
+  #### REPROJECT ####
   RwaProj_unp <-  CRS("+init=epsg:4326")  # unprojected
   
   
@@ -211,6 +240,34 @@
   nat_roads.df <- tidy(nat_roads)
   
   
+  
+  
+  #------------------------------------------------------------------------------#
+  #### TRIM DATA ####
+  
+
+  trim_level_busi <- 25
+  
+  # Trim N business
+  villages.df$N_busi_trim <- villages.df$N_busi
+  villages.df$N_busi_trim[villages.df$N_busi_trim > trim_level_busi] <- trim_level_busi
+  
+  vill.buff.df$N_busi_trim <- vill.buff.df$N_busi
+  vill.buff.df$N_busi_trim[vill.buff.df$N_busi_trim > trim_level_busi] <- trim_level_busi
+  
+  
+  
+  # Trim N_jobs
+  
+  trim_level_jobs <- 80
+  
+  villages.df$N_jobs_trim <- villages.df$N_jobs
+  villages.df$N_jobs_trim[villages.df$N_jobs_trim > trim_level_jobs] <- trim_level_jobs
+  
+  vill.buff.df$N_jobs_trim <- vill.buff.df$N_jobs
+  vill.buff.df$N_jobs_trim[vill.buff.df$N_jobs_trim > trim_level_jobs] <- trim_level_jobs
+  
+  
   #------------------------------------------------------------------------------#
   #### LOAD BASEMAPS AND COUNTRY SHAPES ####
   
@@ -223,10 +280,10 @@
   #bdi <- bdi[13,]
   
   # Basemaps 
-  basemap_rwa <- get_map(location = c(lon=mean(districts.df$long), 
-                                      lat=mean(districts.df$lat)), 
-                         zoom= 8,
-                         maptype="satellite") # roadmap, satellite, etc. See help(get_map)
+  # basemap_rwa <- get_map(location = c(lon=mean(districts.df$long), 
+  #                                     lat=mean(districts.df$lat)), 
+  #                        zoom= 8,
+  #                        maptype="satellite") # roadmap, satellite, etc. See help(get_map)
   
   basemap_cor <- get_map(location = c(lon=mean(cor_districts.df$long), 
                                       lat=mean(cor_districts.df$lat)), 
@@ -236,185 +293,235 @@
   #------------------------------------------------------------------------------#
   #### BUFFER MAP ####
   
-  # District Labels
-  cor_districts_ct <- gCentroid(cor_districts, byid = T)
-  cor_districts_ct.df <- as.data.frame(coordinates(cor_districts_ct))
   
-  cor_districts_ct.df$dist_name <- cor_districts@data$NOMDISTR
-  names(cor_districts_ct.df) <- c("long", "lat", "dist_name")
+  if (EXPORT_maps) {
   
-  cor_districts_ct.df$dist_name <- tolower(cor_districts_ct.df$dist_name)
-  cor_districts_ct.df$dist_name<- tools::toTitleCase(cor_districts_ct.df$dist_name)
-  
-  # Country lables
-  country_labels <- data.frame(
-    long = c(30.12, 30.20, 30.58),
-    lat  = c(-1.73, -2.55, -2.58),
-    name = c("RWANDA", "BURUNDI", "TANZANIA")
-  )
-  
-  # Map
-  buff_cols <- c("Corridor" = "firebrick",
-                 "10km buffer" = "red",
-                 "National roads" = "gold4")
-  
-  #buff_map <- 
-    ggmap(basemap_cor) +
-      #ggplot() + 
-      
-        geom_polygon(data = rwa, 
-                     aes(y= lat, x = long, group = group),
-                     fill= "gray58", 
-                     alpha = 0.2, 
-                     color = "black",  
-                     size = .2) +
-        geom_polygon(data = tza, 
-                     aes(y= lat, x = long, group = group),
-                     fill= "gray58", 
-                     alpha = 0.00, 
-                     color = "black",  
-                     size = .7) +
-        geom_polygon(data = cor_districts.df,
-                     aes(y= lat, x = long, group = group),
-                     fill= "gray87",
-                     alpha = 0.2,
-                     color = "black",
-                     size = .7) +
-      
-      geom_path(data = nat_roads.df,
-                aes(y= lat, 
-                    x = long, 
-                    group = group,
-                    col = "National roads"),
-                alpha = 0.8,
-                size = 1) +
-      
-        geom_polygon(data = cor.buf10.df, 
-                     aes(y= lat, 
-                         x = long, 
-                         group = group,
-                         fill = "10km buffer"), 
-                     alpha = 0.2,  
-                     size = .1) +
+    # District Labels
+    cor_districts_ct <- gCentroid(cor_districts, byid = T)
+    cor_districts_ct.df <- as.data.frame(coordinates(cor_districts_ct))
+    
+    cor_districts_ct.df$dist_name <- cor_districts@data$NOMDISTR
+    names(cor_districts_ct.df) <- c("long", "lat", "dist_name")
+    
+    cor_districts_ct.df$dist_name <- tolower(cor_districts_ct.df$dist_name)
+    cor_districts_ct.df$dist_name<- tools::toTitleCase(cor_districts_ct.df$dist_name)
+    
+    # Country lables
+    country_labels <- data.frame(
+      long = c(30.12, 30.20, 30.58),
+      lat  = c(-1.73, -2.55, -2.58),
+      name = c("RWANDA", "BURUNDI", "TANZANIA")
+    )
+    
+    # Map
+    buff_cols <- c("Corridor" = "firebrick",
+                   "10km buffer" = "red",
+                   "National roads" = "gold4")
+    
+    #buff_map <- 
+      ggmap(basemap_cor) +
+        #ggplot() + 
         
-        geom_text_repel(data = cor_districts_ct.df,
-                        aes(y= lat, 
-                            x = long, 
-                            label = dist_name),
-                        size = 7) +
-
-        geom_path(data = cor.df,
+          geom_polygon(data = rwa, 
+                       aes(y= lat, x = long, group = group),
+                       fill= "gray58", 
+                       alpha = 0.2, 
+                       color = "black",  
+                       size = .2) +
+          geom_polygon(data = tza, 
+                       aes(y= lat, x = long, group = group),
+                       fill= "gray58", 
+                       alpha = 0.00, 
+                       color = "black",  
+                       size = .7) +
+          geom_polygon(data = cor_districts.df,
+                       aes(y= lat, x = long, group = group),
+                       fill= "gray87",
+                       alpha = 0.2,
+                       color = "black",
+                       size = .7) +
+        
+        geom_path(data = nat_roads.df,
                   aes(y= lat, 
                       x = long, 
                       group = group,
+                      col = "National roads"),
+                  alpha = 0.8,
+                  size = 1) +
+        
+          geom_polygon(data = cor.buf10.df, 
+                       aes(y= lat, 
+                           x = long, 
+                           group = group,
+                           fill = "10km buffer"), 
+                       alpha = 0.2,  
+                       size = .1) +
+          
+          geom_text_repel(data = cor_districts_ct.df,
+                          aes(y= lat, 
+                              x = long, 
+                              label = dist_name),
+                          size = 7) +
+  
+          geom_path(data = cor.df,
+                    aes(y= lat, 
+                        x = long, 
+                        group = group,
+                        col = "Corridor"),
+                    size = 1) +
+  
+          geom_text(data = country_labels,
+                    aes(y= lat, 
+                        x = long, 
+                        label = name),
+                    size = 7) + 
+          
+          theme(legend.text = element_text(size = 22),
+                panel.background = element_blank(),
+                panel.grid.major = element_blank(), 
+                panel.grid.minor = element_blank(),
+                legend.title=element_blank(),
+                axis.title.x=element_blank(), 
+                axis.title.y=element_blank()) + 
+    
+          coord_fixed(xlim=c(29.65, 30.75), ylim=c(-1.65, -2.75), ratio = 1) + 
+        
+          scale_colour_manual(values=buff_cols)  +
+          scale_fill_manual(values=buff_cols) +
+        
+          ggsave(file.path(OUT_maps, "Corridor_affected_districts.png"),
+                 width = 30, height = 30, units = "cm")
+      
+      
+      
+    #------------------------------------------------------------------------------#
+    #### BUSINESSES HEAT MAP ####
+
+    #### Rwanda ####
+    #rwa_heatMap <- 
+      ggplot()+
+        geom_polygon(data = villages.df, 
+                     aes(y= lat, 
+                         x = long,
+                         group = group,
+                         fill = N_busi_trim )) +
+       
+      theme_void() +
+      theme(legend.text = element_text(size = 11),
+            #legend.title= element_text(size=22),
+            legend.position = c(0.15, 0.8)) +
+    
+      scale_fill_gradientn(name ="Number of\nbusiness",
+                           colours = viridis(10),
+                           labels = c("","5", "10", "15","20", "25+")) +
+      
+      coord_quickmap() +
+      
+      ggsave(file.path(OUT_maps, "Rwa_businesses_heatMAp.png"),
+             width = 15, height = 15, units = "cm")
+    
+    
+    #### Around corridor
+    
+    heat_cols <- c("Corridor" = "firebrick")
+    
+    #cor_heatMap <- 
+      ggplot()+
+        geom_polygon(data = vill.buff.df, 
+                     aes(y= lat, 
+                         x = long,
+                         group = group,
+                         fill = N_busi_trim )) +
+        geom_path(data = cor.df,
+                  aes(y= lat, 
+                      x = long,
+                      group = group,
                       col = "Corridor"),
                   size = 1) +
-
-        geom_text(data = country_labels,
-                  aes(y= lat, 
-                      x = long, 
-                      label = name),
-                  size = 7) + 
+        theme_void() + 
+      
+        theme(legend.text = element_text(size = 11),
+              legend.position = c(0.85, 0.2)) +
+  
+        scale_fill_gradientn(name ="Number of\nbusiness",
+                             colours = viridis(10),
+                             labels = c("","5", "10", "15","20", "25+")) +
         
-        theme(legend.text = element_text(size = 22),
-              panel.background = element_blank(),
-              panel.grid.major = element_blank(), 
-              panel.grid.minor = element_blank(),
-              legend.title=element_blank(),
-              axis.title.x=element_blank(), 
-              axis.title.y=element_blank()) + 
+        scale_colour_manual(name = "",
+                            values=heat_cols) +
+        coord_quickmap() +
+      
+      
+        ggsave(file.path(OUT_maps, "Corridor_businesses_heatMAp.png"),
+               width = 30, height = 15, units = "cm")
   
-        coord_fixed(xlim=c(29.65, 30.75), ylim=c(-1.65, -2.75), ratio = 1) + 
       
-        scale_colour_manual(values=buff_cols)  +
-        scale_fill_manual(values=buff_cols) +
+    #------------------------------------------------------------------------------#
+    #### JOBS HEAT MAP ####    
       
-        ggsave(file.path(OUT, "Corridor_affected_districts.png"),
-               width = 30, height = 30, units = "cm")
-    
-    
+    #### Rwanda ####
+    #rwa_heatMap <- 
+      ggplot()+
+        geom_polygon(data = villages.df, 
+                     aes(y= lat, 
+                         x = long,
+                         group = group,
+                         fill = N_jobs_trim )) +
+        
+        theme_void() +
+        theme(legend.text = element_text(size = 11),
+              #legend.title= element_text(size=22),
+              legend.position = c(0.15, 0.8)) +
+        
+        scale_fill_gradientn(name ="Number of\njobs",
+                             colours = viridis(10),
+                             #palette = viridis_pal(),
+                             labels = c("", "20", "40", "60", "80+")) +
+        
+        coord_quickmap() +
+        
+        ggsave(file.path(OUT_maps, "Rwa_jobs_heatMAp.png"),
+               width = 15, height = 15, units = "cm")
+      
+      
+      #### Around corridor
+      
+      # heat_cols <- c("Corridor" = "firebrick")
+      
+      #cor_heatMap <- 
+      ggplot()+
+        geom_polygon(data = vill.buff.df, 
+                     aes(y= lat, 
+                         x = long,
+                         group = group,
+                         fill = N_jobs_trim )) +
+        geom_path(data = cor.df,
+                  aes(y= lat, 
+                      x = long,
+                      group = group,
+                      col = "Corridor"),
+                  size = 1) +
+        theme_void() + 
+        
+        theme(legend.text = element_text(size = 11),
+              legend.position = c(0.85, 0.2)) +
+        
+        scale_fill_gradientn(name ="Number of\njobs",
+                             colours = viridis(10),
+                             #palette = viridis_pal(),
+                             labels = c("", "20", "40", "60", "80+")) +
+        
+        scale_colour_manual(name = "",
+                            values=heat_cols) +
+        coord_quickmap() +
+        
+        
+        ggsave(file.path(OUT_maps, "Corridor_jobs_heatMAp.png"),
+               width = 30, height = 15, units = "cm")  
+      
+  }
     
   #------------------------------------------------------------------------------#
-  #### BUSINESSES HEAT MAP ####
-  
-  # Trim N business
-  trim_level <- 30
-  
-  villages.df$N_busi_trim <- villages.df$N_busi
-  villages.df$N_busi_trim[villages.df$N_busi_trim > trim_level] <- trim_level
-  
-  vill.buff.df$N_busi_trim <- vill.buff.df$N_busi
-  vill.buff.df$N_busi_trim[vill.buff.df$N_busi_trim > trim_level] <- trim_level
-  
-  
-  #### Rwanda ####
-  #rwa_heatMap <- 
-    ggplot()+
-      geom_polygon(data = villages.df, 
-                   aes(y= lat, 
-                       x = long,
-                       group = group,
-                       fill = N_busi_trim )) +
-     
-    theme_void() +
-    theme(legend.text = element_text(size = 11),
-          #legend.title= element_text(size=22),
-          legend.position = c(0.15, 0.8)) +
-  
-    scale_fill_gradientn(name ="Number of\nbusiness",
-                         colours = viridis(10),
-                         #palette = viridis_pal(),
-                         labels = c("", "10", "20", "30+")) + 
-    
-    coord_quickmap() +
-    
-    ggsave(file.path(OUT, "Rwa_businesses_heatMAp.png"),
-           width = 15, height = 15, units = "cm")
-  
-  
-  #### Around corridor
-  
-  heat_cols <- c("Corridor" = "firebrick")
-  
-  #cor_heatMap <- 
-    ggplot()+
-      geom_polygon(data = vill.buff.df, 
-                   aes(y= lat, 
-                       x = long,
-                       group = group,
-                       fill = N_busi_trim )) +
-      geom_path(data = cor.df,
-                aes(y= lat, 
-                    x = long,
-                    group = group,
-                    col = "Corridor"),
-                size = 1) +
-      theme_void() + 
-    
-      theme(legend.text = element_text(size = 11),
-            legend.position = c(0.85, 0.2)) +
-
-      scale_fill_gradientn(name ="Number of\nbusiness",
-                           #colours=rev(heat.colors(10)),
-                           colours = viridis(10),
-                           #na.value="grey90",
-                           labels = c("", "10", "20", "30+")
-                          ) +
-      scale_colour_manual(name = "",
-                          values=heat_cols) +
-      coord_quickmap() +
-    
-    
-      ggsave(file.path(OUT, "Corridor_businesses_heatMAp.png"),
-             width = 30, height = 15, units = "cm")
-  
-  #------------------------------------------------------------------------------#
-  #### HEAT MAP ####
-  
-  # Rwanda
-  
-  # Around corriodor
-  
   #### CADASTRE MAP EXAMPLE ####
   
   
