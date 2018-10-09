@@ -397,5 +397,15 @@ if (EXPORT_tables){
   #       file = file.path(OUT_tables, "singleDif_cadTransactions_rwamagana.tex"))
 }
 
+#------------------------------------------------------------------------------#
+#### P ####
 
+
+data.frame(control = c(mean(villData_reg$sell[villData_reg$treated == 0]),
+                       sd(villData_reg$sell[villData_reg$treated == 0]),
+                       length(unique(villData_reg$vill_code_str[villData_reg$treated == 0]))),
+           treatment = c(mean(villData_reg$sell[villData_reg$treated == 1]),
+                         sd(villData_reg$sell[villData_reg$treated == 1]),
+                         length(unique(villData_reg$vill_code_str[villData_reg$treated == 1]))),
+           row.names = c("Mean", "Std. Deviation", "N"))
 

@@ -127,6 +127,11 @@ vill_treat<- subset(villages,
                                 byid = T) %>% as.logical)
 
 
+# Remove duplicated villages
+vill_cont <- vill_cont[!(vill_cont@data$Code_vill_ %in% vill_treat@data$Code_vill_),]
+
+
+
 #------------------------------------------------------------------------------#
 #### SINGLE DIFFERENCE ####
 
@@ -511,3 +516,5 @@ if(RUN_aux_maps){
   
 
 }
+
+
