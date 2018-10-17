@@ -91,12 +91,12 @@
   RFR_shapeFiles <- file.path(RFR, "data/gis/Shapefiles")
   LVTP_shapeFiles <- file.path(LVTP, "data/corridor shapefile")
   
-  RFR_data <- file.path(RFR, "data/surveys")
+  RFR_data <- file.path(RFR, "data")
   LVTP_data <- file.path(LVTP, "data")
   
   RFR_CAD <- file.path(RFR_shapeFiles, "Cadastre")
   
-  LAIS2018 <- file.path(RFR, "data/admin/LAIS/LAIS data request 2018")
+  LAIS2018 <- file.path(RFR, "data/secondary data/LAIS/LAIS data request 2018")
   
   #CAD_temp_path <- "C:/Users/Leonardo/Dropbox/Work/cadaster/districts/"
   
