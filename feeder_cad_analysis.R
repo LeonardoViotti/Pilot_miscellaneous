@@ -27,7 +27,7 @@ nat_roads <- readOGR(file.path(RFR_shapeFiles,"Roads"), "National_rds")
 
 #### Road monitoring
 rms	 	<- read.dta13(	file.path(RFR_data, 
-                               "Road Monitoring/Data/master_monitoring_objectid&status.dta"),
+                               "primary data/Road Monitoring/Data/master_monitoring_objectid&status.dta"),
                      convert.factors = F)
 
 
@@ -91,9 +91,16 @@ lais$sell[grepl("Transfer of", lais$description)] <- 1
 lais <- lais[lais$sell == 1,]
 
 #### Keep only interest varaibles
-lais <- lais[, c("upi", "area", "fees_amount", "sell")]
+lais <- lais[, c("upi", "area", "fees_amount", "sell", "approval_date")]
 
-names(lais) <- c("UPI", "area", "price", "sell")
+names(lais) <- c("UPI", "area", "price", "sell", "aDate")
+
+#### Date variables
+lais$aDate <- as.Date(lais$aDate)
+lais$aDate_year <- format(lais$aDate,"%Y")
+lais$aDate_month <- format(lais$aDate,"%m")
+
+
 
 #------------------------------------------------------------------------------#
 #### CALCULATE BUFFERS ####
@@ -246,17 +253,6 @@ cad1km_vill$area <- cad1km_vill$area_m/1000000
 
 
 
-#------------------------------------------------------------------------------#
-#### CALCULATE BUFFERS ####
-
-fs.buf <- gBuffer(fs_simp, width = 1000, byid = T)
-nat.buf <- gBuffer(nat_roads, width = 1000)
-
-#------------------------------------------------------------------------------#
-#### INTERSECTION ####
-
-connect.buf <- intersect(fs.buf, nat.buf)
-isolated.buf <- gDifference(fs.buf, connect.buf)
 
 #------------------------------------------------------------------------------#
 #### Villages within buffers ####
