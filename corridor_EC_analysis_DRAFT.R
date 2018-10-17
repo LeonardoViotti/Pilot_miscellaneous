@@ -328,18 +328,60 @@
   
   reg_c1_tex <- 
     stargazer(reg_c1,
-              reg_c2,
-              reg_c3,
-              reg_c4,
               title = "Number of Businesses - Cenario 1",
-              covariate.labels = c("Treatment", 
+              covariate.labels = c("Within 1km", 
                                    "Year 2014", 
-                                   "Treatment X Year 2014"),
+                                   "Within 1km X Year 2014"),
               dep.var.labels  = c("Businesses (log)"),
-              column.labels = c("Cenario 1", "Cenario 2", "Cenario 3", "Cenario 4"), 
+              table.placement = "H",
+              #column.labels = c("Cenario 1", "Cenario 2", "Cenario 3", "Cenario 4"), 
               omit.stat = c("f", "ser"))
   
   write(reg_c1_tex,
         file = file.path(OUT_tables, "corEC_c1_busi.tex"))
   
+  
+  reg_c2_tex <- 
+    stargazer(reg_c2,
+              title = "Number of Businesses - Cenario 2",
+              covariate.labels = c("Within 2km", 
+                                   "Year 2014", 
+                                   "Within 2km X Year 2014"),
+              dep.var.labels  = c("Businesses (log)"),
+              table.placement = "H",
+              #column.labels = c("Cenario 1", "Cenario 2", "Cenario 3", "Cenario 4"), 
+              omit.stat = c("f", "ser"))
+  
+  write(reg_c2_tex,
+        file = file.path(OUT_tables, "corEC_c2_busi.tex"))
+  
+  
+  reg_c3_tex <- 
+    stargazer(reg_c3,
+              title = "Number of Businesses - Cenario 3",
+              covariate.labels = c("Within 3km", 
+                                   "Year 2014", 
+                                   "Within 3km X Year 2014"),
+              dep.var.labels  = c("Businesses (log)"),
+              table.placement = "H",
+              #column.labels = c("Cenario 1", "Cenario 2", "Cenario 3", "Cenario 4"), 
+              omit.stat = c("f", "ser"))
+  
+  write(reg_c3_tex,
+        file = file.path(OUT_tables, "corEC_c3_busi.tex"))
+  
+  
+  reg_c4_tex <- 
+    stargazer(reg_c4,
+              title = "Number of Businesses - Cenario 1",
+              covariate.labels = c("Within 1km", 
+                                   "Year 2014", 
+                                   "Within 1km X Year 2014"),
+              dep.var.labels  = c("Businesses (log)"),
+              table.placement = "H",
+              #column.labels = c("Cenario 1", "Cenario 2", "Cenario 3", "Cenario 4"), 
+              omit.stat = c("f", "ser"))
+  
+  write(reg_c4_tex,
+        file = file.path(OUT_tables, "corEC_c4_busi.tex"))
   
