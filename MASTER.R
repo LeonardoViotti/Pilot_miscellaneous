@@ -25,8 +25,9 @@
   library(ggrepel)
   library(ggthemes)
   
-
-  
+  # Regression
+  library(lfe)
+  library(stargazer)
   
   # Spacial
   library(sp)
@@ -39,6 +40,17 @@
   library(ggmap)
   library(leaflet)
 
+  
+  
+  #----------------------------------#
+  #### 1.2. Function definitions	####
+  
+  # Inverse hyperbolic sine
+  inv_hsine <- 
+    function(yi){
+      log(yi+sqrt((yi^2)+1))
+    }
+  
   #------------------------------------------------------------------------------#
   #### SWITCHES ####
   
@@ -80,6 +92,7 @@
   LVTP_shapeFiles <- file.path(LVTP, "data/corridor shapefile")
   
   RFR_data <- file.path(RFR, "data/surveys")
+  LVTP_data <- file.path(LVTP, "data")
   
   RFR_CAD <- file.path(RFR_shapeFiles, "Cadastre")
   
