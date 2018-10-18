@@ -101,7 +101,6 @@ lais$aDate_year <- format(lais$aDate,"%Y")
 lais$aDate_month <- format(lais$aDate,"%m")
 
 
-
 #------------------------------------------------------------------------------#
 #### CALCULATE BUFFERS ####
 
@@ -173,6 +172,7 @@ if (RUN_cadIntersection){
                                     gUnaryUnion(connect.buf),
                                     byid = T) %>% as.logical)
     
+    
     ### Create Data set ####
     cad_cont@data$treated <- 0
     cad_treat@data$treated <- 1
@@ -180,8 +180,11 @@ if (RUN_cadIntersection){
     cad_data_i <- NULL
     cad_data_i <- rbind(cad_cont@data, cad_treat@data)
     
+    
+    
+    
     # Remove shapefiles
-    rm(cad_treat, cad_cont)
+    #rm(cad_treat, cad_cont)
     
     
     #### Store dataset in object ####
@@ -218,13 +221,13 @@ if (RUN_cadIntersection){
                Nyabihu_cadData,   
                Gakenke_cadData )
   
-  # write.csv(foo,
-  #           #file = "C:/Users/WB519128/Dropbox/Work/WB/Rwanda Lake Victoria Transport Corridor/data/RFR_feeder_CN_data/cad_feed1km_data.csv",
-  #           file.path(LVTP_data, "RFR_feeder_CN_data/cad_feed1km.csv"),
-  #           row.names = F)
+  write.csv(foo,
+            #file = "C:/Users/WB519128/Dropbox/Work/WB/Rwanda Lake Victoria Transport Corridor/data/RFR_feeder_CN_data/cad_feed1km_data.csv",
+            file.path(LVTP_data, "RFR_feeder_CN_data/cad_feed1km_101818.csv"),
+            row.names = F)
 
 }else{
-  cad1km <- read.csv(file.path(LVTP_data, "RFR_feeder_CN_data/cad_feed1km.csv"),
+  cad1km <- read.csv(file.path(LVTP_data, "RFR_feeder_CN_data/cad_feed1km_101818.csv"),
                      header = T)
 }
 
@@ -404,4 +407,7 @@ data.frame(control = c(mean(villData_reg$sell[villData_reg$treated == 0]),
                          sd(villData_reg$sell[villData_reg$treated == 1]),
                          length(unique(villData_reg$vill_code_str[villData_reg$treated == 1]))),
            row.names = c("Mean", "Std. Deviation", "N"))
+
+
+
 
