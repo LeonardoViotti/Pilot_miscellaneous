@@ -123,6 +123,17 @@ sta_markets <-
  
  stPs$year_month <- factor(stPs$year_month, ordered = T)
  
+ 
+ 
+ edPs$price_tomato_n <- (edPs$price_tomato - mean(edPs$price_tomato, na.rm = T))/sd(edPs$price_tomato, na.rm = T)
+ edPs$price_cook_oil_n <- (edPs$price_cook_oil - mean(edPs$price_cook_oil, na.rm = T))/sd(edPs$price_cook_oil, na.rm = T)
+ edPs$price_cook_banana_n <- (edPs$price_cook_banana - mean(edPs$price_cook_banana, na.rm = T))/sd(edPs$price_cook_banana, na.rm = T)
+ 
+ stPs$price_tomato_n <- (stPs$price_tomato - mean(stPs$price_tomato, na.rm = T))/sd(stPs$price_tomato, na.rm = T)
+ stPs$price_cook_oil_n <- (stPs$price_cook_oil - mean(stPs$price_cook_oil, na.rm = T))/sd(stPs$price_cook_oil, na.rm = T)
+ stPs$price_cook_banana_n <- (stPs$price_cook_banana - mean(stPs$price_cook_banana, na.rm = T))/sd(stPs$price_cook_banana, na.rm = T)
+ 
+ 
  #### Reshape by trader
  
  # edPs_long <- gather(edPs, 
@@ -151,18 +162,18 @@ sta_markets <-
 
  ggplot(data = edPs,
         aes(x = year_month,
-            y = price_tomato,
+            y = price_tomato_n,
             color = marketname_str,
             group = market_uid)) + 
    geom_line() +
    geom_vline(xintercept = c(10)) +
    annotate(geom="text",
-            x=12.4,
-            y=700,
+            x=11.5,
+            y=2,
             label= paste("End of construction\n", end_date),
             size = 3) +
    theme_minimal() +
-   labs(title="Price of tomato - 3 markets in Rwamagana",
+   labs(title="Normalized prices of tomato - 3 markets in Rwamagana",
         x ="", 
         y = "RWFs ",
         color = "") +
@@ -177,19 +188,19 @@ sta_markets <-
  
  ggplot(data = stPs,
         aes(x = year_month,
-            y = price_tomato,
+            y = price_tomato_n,
             color = marketname_str,
             group = market_uid)) + 
    geom_line() +
    geom_vline(xintercept = c(8)) +
    
    annotate(geom="text",
-            x=10.4,
-            y=700,
+            x=9.5,
+            y=3,
             label= paste("Start of construction\n", start_date),
             size = 3) +
    theme_minimal() +
-   labs(title="Price of tomato - 4 markets in Karongi",
+   labs(title="Normalized prices of tomato - 4 markets in Karongi",
         x ="", 
         y = "RWFs ",
         color = "") +
@@ -203,18 +214,18 @@ sta_markets <-
  
  ggplot(data = edPs,
         aes(x = year_month,
-            y = price_cook_oil,
+            y = price_cook_oil_n,
             color = marketname_str,
             group = market_uid)) + 
    geom_line() +
    geom_vline(xintercept = c(10)) +
    annotate(geom="text",
-            x=12.4,
-            y=1800,
+            x=11.5,
+            y=2,
             label= paste("End of construction\n", end_date),
             size = 3) +
    theme_minimal() +
-   labs(title="Price of cooking oil - 3 markets in Rwamagana",
+   labs(title="Normalized prices of cooking oil - 3 markets in Rwamagana",
         x ="", 
         y = "RWFs ",
         color = "") +
@@ -229,19 +240,19 @@ sta_markets <-
  
  ggplot(data = stPs,
         aes(x = year_month,
-            y = price_cook_oil,
+            y = price_cook_oil_n,
             color = marketname_str,
             group = market_uid)) + 
    geom_line() +
    geom_vline(xintercept = c(8)) +
    
    annotate(geom="text",
-            x=10.4,
-            y=1850,
+            x=9.5,
+            y=2,
             label= paste("Start of construction\n", start_date),
             size = 3) +
    theme_minimal() +
-   labs(title="Price of cooking oil - 4 markets in Karongi",
+   labs(title="Normalized prices of cooking oil - 4 markets in Karongi",
         x ="", 
         y = "RWFs ",
         color = "") +
@@ -254,18 +265,18 @@ sta_markets <-
  
  ggplot(data = edPs,
         aes(x = year_month,
-            y = price_cook_banana,
+            y = price_cook_banana_n,
             color = marketname_str,
             group = market_uid)) + 
    geom_line() +
    geom_vline(xintercept = c(10)) +
    annotate(geom="text",
-            x=12.4,
-            y=100,
+            x=11.5,
+            y=2,
             label= paste("End of construction\n", end_date),
             size = 3) +
    theme_minimal() +
-   labs(title="Price of bananas (cooking) - 3 markets in Rwamagana",
+   labs(title="Normalized prices of bananas (cooking) - 3 markets in Rwamagana",
         x ="", 
         y = "RWFs ",
         color = "") +
@@ -280,19 +291,19 @@ sta_markets <-
  
  ggplot(data = stPs,
         aes(x = year_month,
-            y = price_cook_banana,
+            y = price_cook_banana_n,
             color = marketname_str,
             group = market_uid)) + 
    geom_line() +
    geom_vline(xintercept = c(8)) +
    
    annotate(geom="text",
-            x=10.4,
-            y=150,
+            x=9.5,
+            y=2,
             label= paste("Start of construction\n", start_date),
             size = 3) +
    theme_minimal() +
-   labs(title="Price of bananas (cooking) - 4 markets in Karongi",
+   labs(title="Normalized prices of bananas (cooking) - 4 markets in Karongi",
         x ="", 
         y = "RWFs ",
         color = "") +
@@ -309,8 +320,10 @@ sta_markets <-
 # Construction start: a
  
  
-#### Crazy grpahs #####
+ #-------------------------------------------------------------------------------#
+ #### Event study dewsign
  
+ #### Average price per market.
  
  ps_noc <- ps[ps$start_diff != 999,]
  
@@ -320,21 +333,32 @@ sta_markets <-
  ps_noc$price_cook_banana <- rowMeans(ps_noc[, c("w_std_price_cook_banana_1", "w_std_price_cook_banana_2")], na.rm = T)
  
  
+ 
+ #### Normalize prices
+ 
+ ps_noc$price_tomato_n <- (ps_noc$price_tomato - mean(ps_noc$price_tomato, na.rm = T))/sd(ps_noc$price_tomato, na.rm = T)
+ ps_noc$price_cook_oil_n <- (ps_noc$price_cook_oil - mean(ps_noc$price_cook_oil, na.rm = T))/sd(ps_noc$price_cook_oil, na.rm = T)
+ ps_noc$price_cook_banana_n <- (ps_noc$price_cook_banana - mean(ps_noc$price_cook_banana, na.rm = T))/sd(ps_noc$price_cook_banana, na.rm = T)
+ 
+ 
+ 
+ #### Crazy grpahs #####
+ 
  ggplot(data = ps_noc,
        aes(x = start_diff,
-           y = price_tomato,
+           y = price_tomato_n,
            color = marketname_str,
            group = market_uid)) + 
    geom_line() +
    geom_vline(xintercept = c(0)) +
    annotate(geom="text",
-            x=3.5,
-            y=800,
+            x=3,
+            y=2.1,
             label= "Start of construction",
             size = 3) +
    theme_minimal() +
    theme(legend.position="none")+
-   labs(title="Price of tomato",
+   labs(title="Normalized prices of tomato",
         x ="Months from start of construction", 
         y = "RWFs ",
         color = "") +
@@ -345,19 +369,19 @@ sta_markets <-
  
  ggplot(data = ps_noc,
         aes(x = start_diff,
-            y = price_cook_oil,
+            y = price_cook_oil_n,
             color = marketname_str,
             group = market_uid)) + 
    geom_line() +
    geom_vline(xintercept = c(0)) +
    annotate(geom="text",
-            x=3.5,
-            y=2000,
+            x=3,
+            y=2.1,
             label= "Start of construction",
             size = 3) +
    theme_minimal() +
    theme(legend.position="none")+
-   labs(title="Price of cooking oil",
+   labs(title="Normalized prices of cooking oil",
         x ="Months from start of construction", 
         y = "RWFs ",
         color = "") +
@@ -368,19 +392,19 @@ sta_markets <-
  
  ggplot(data = ps_noc,
         aes(x = start_diff,
-            y = price_cook_banana,
+            y = price_cook_banana_n,
             color = marketname_str,
             group = market_uid)) + 
    geom_line() +
    geom_vline(xintercept = c(0)) +
    annotate(geom="text",
-            x=3.5,
-            y=350,
+            x=3,
+            y=2.1,
             label= "Start of construction",
             size = 3) +
    theme_minimal() +
    theme(legend.position="none")+
-   labs(title="Price of banana (cooking)",
+   labs(title="Normalized prices of banana (cooking)",
         x ="Months from start of construction", 
         y = "RWFs ",
         color = "") +
