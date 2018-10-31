@@ -13,26 +13,26 @@ RUN_cadIntersection = F
 #### LOAD data ####
 
 #### Load LAIS
-lais_E <- read.csv(file.path(LAIS2018, "WB_Eastern.csv"), header = T, sep = ";", stringsAsFactors=FALSE)
-lais_W <- read.csv(file.path(LAIS2018, "WB_Western.csv"), header = T, sep = ";", stringsAsFactors=FALSE)
-lais_S <- read.csv(file.path(LAIS2018, "WB_Southern.csv"), header = T, sep = ";", stringsAsFactors=FALSE)
-lais_N <- read.csv(file.path(LAIS2018, "WB_Northern.csv"), header = T, sep = ";", stringsAsFactors=FALSE)
+lais_E <- read.csv(file.path(LAIS, "LAIS data request 2018/WB_Eastern.csv"), header = T, sep = ";", stringsAsFactors=FALSE)
+lais_W <- read.csv(file.path(LAIS, "LAIS data request 2018/WB_Western.csv"), header = T, sep = ";", stringsAsFactors=FALSE)
+lais_S <- read.csv(file.path(LAIS, "LAIS data request 2018/WB_Southern.csv"), header = T, sep = ";", stringsAsFactors=FALSE)
+lais_N <- read.csv(file.path(LAIS, "LAIS data request 2018/WB_Northern.csv"), header = T, sep = ";", stringsAsFactors=FALSE)
 
 #### Shapefiles
-fr_sample	<- readOGR(file.path(RFR_shapeFiles,"Roads/Sample"), "feeder_sample_abr18", pointDropZ = T)
-nat_roads <- readOGR(file.path(RFR_shapeFiles,"Roads"), "National_rds")
+fr_sample	<- readOGR(file.path(GIS,"Roads/Sample"), "feeder_sample_abr18", pointDropZ = T)
+nat_roads <- readOGR(file.path(GIS,"Roads"), "National_rds")
 
 #villages <- readOGR(file.path(RFR_shapeFiles,"Villages"), "processed_villages_boundaries")
 
 
 #### Road monitoring
-rms	 	<- read.dta13(	file.path(RFR_data, 
-                               "primary data/Road Monitoring/Data/master_monitoring_objectid&status.dta"),
+rms	 	<- read.dta13(	file.path(RMS, 
+                               "master_monitoring_objectid&status.dta"),
                      convert.factors = F)
 
 
 
-villages <- readOGR(file.path(RFR_shapeFiles,"Villages"), "processed_villages_boundaries")
+villages <- readOGR(file.path(GIS,"Villages"), "processed_villages_boundaries")
 villages <- villages[villages@data$Shape_Area < 90e+06,]
 
 
@@ -223,11 +223,11 @@ if (RUN_cadIntersection){
   
   write.csv(foo,
             #file = "C:/Users/WB519128/Dropbox/Work/WB/Rwanda Lake Victoria Transport Corridor/data/RFR_feeder_CN_data/cad_feed1km_data.csv",
-            file.path(LVTP_data, "RFR_feeder_CN_data/cad_feed1km_101818.csv"),
+            file.path(ALIS, "cad_feed1km.csv"),
             row.names = F)
 
 }else{
-  cad1km <- read.csv(file.path(LVTP_data, "RFR_feeder_CN_data/cad_feed1km_101818.csv"),
+  cad1km <- read.csv(file.path(ALIS, "cad_feed1km_101818.csv"),
                      header = T)
 }
 
