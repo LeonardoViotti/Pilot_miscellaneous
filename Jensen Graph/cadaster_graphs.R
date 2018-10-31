@@ -1,5 +1,10 @@
+#------------------------------------------------------------------------------#
+#### Swithces ####
+
+EXPORT_cad_graphs = F
 
 
+#------------------------------------------------------------------------------#
 time_breaks <- c("201401",
                  "201405",
                  "201410",
@@ -17,6 +22,10 @@ time_breaks <- c("201401",
 
 #lais$sell[is.na(lais$sell)] <- 0
 
+
+
+#------------------------------------------------------------------------------#
+#### Number of transactions graphs (Around feeders) ####
 
 
 #------------------------------------------------------------------------------#
@@ -53,26 +62,28 @@ sell_perMonth$year_month <- factor(sell_perMonth$year_month, ordered = T)
 
 sell_perMonth$treated <- factor(sell_perMonth$treated, labels = c("Isolated", "Connected"))
 
-ggplot(data = sell_perMonth,
-       aes(x = year_month,
-           y = sell,
-           color = factor(treated),
-           group = treated)) +
-  geom_line()+
-  theme_minimal() +
-  labs(title="Transfer transactions around 1km from feeder roads",
-       x ="", 
-       y = "Number of transactions",
-       color = "") +
-  theme(axis.text.x = element_text(angle = 320, hjust=0, vjust = 1)) + 
-  scale_x_discrete(breaks=time_breaks) +
+g_trans <- 
+  ggplot(data = sell_perMonth,
+         aes(x = year_month,
+             y = sell,
+             color = factor(treated),
+             group = treated)) +
+    geom_line()+
+    theme_minimal() +
+    labs(title="Transfer transactions around 1km from feeder roads",
+         x ="", 
+         y = "Number of transactions",
+         color = "") +
+    theme(axis.text.x = element_text(angle = 320, hjust=0, vjust = 1)) + 
+    scale_x_discrete(breaks=time_breaks)
 
+
+if (EXPORT_cad_graphs){
+  g_trans +
+    ggsave(file.path(OUT_graphs, "Cadaster/Ntransactions_absolute.png"),
+           device = "png")
   
-  ggsave(file.path(OUT_graphs, "Cadaster/Ntransactions_absolute.png"),
-         device = "png")
-
-
-
+}
 
 #------------------------------------------------------------------------------#
 #### Number of transactions graphs  per village (Around feeders) ####
@@ -101,25 +112,31 @@ sell_perMonth_vill$year_month <- factor(sell_perMonth_vill$year_month, ordered =
 
 #sell_perMonth_vill$treated <- factor(sell_perMonth_vill$treated, labels = c("Isolated", "Connected"))
 
-ggplot(data = sell_perMonth_vill,
-       aes(x = year_month,
-           y = sell)) +
-  geom_point(col = "navyblue") +
-  geom_errorbar(aes(ymin = sell - sell_sd,
-                    ymax = sell + sell_sd),  
-                col = "navyblue", width=.2) +
-  
-  theme_minimal() +
-  labs(title="Transfer per village transactions around 1km from feeder roads",
-       x ="", 
-       y = "Number of transactions",
-       color = "") +
-  theme(axis.text.x = element_text(angle = 320, hjust=0, vjust = 1)) + 
-  scale_x_discrete(breaks=time_breaks) +
-  
-  ggsave(file.path(OUT_graphs, "Cadaster/Ntransactions_per_village.png"),
-         device = "png")
 
+g_transVill <- 
+  ggplot(data = sell_perMonth_vill,
+         aes(x = year_month,
+             y = sell)) +
+    geom_point(col = "navyblue") +
+    geom_errorbar(aes(ymin = sell - sell_sd,
+                      ymax = sell + sell_sd),  
+                  col = "navyblue", width=.2) +
+    
+    theme_minimal() +
+    labs(title="Transfer per village transactions around 1km from feeder roads",
+         x ="", 
+         y = "Number of transactions",
+         color = "") +
+    theme(axis.text.x = element_text(angle = 320, hjust=0, vjust = 1)) + 
+    scale_x_discrete(breaks=time_breaks)
+  
+
+
+if (EXPORT_cad_graphs){
+  g_transVill + 
+    ggsave(file.path(OUT_graphs, "Cadaster/Ntransactions_per_village.png"),
+           device = "png")
+}
 
 #------------------------------------------------------------------------------#
 #### Average transactions  per village (Around feeders) ####
@@ -142,25 +159,28 @@ sM_vill_treat_wide$year_month <- factor(sM_vill_treat_wide$year_month, ordered =
 # Difference between treated and control
 sM_vill_treat_wide$diff <- sM_vill_treat_wide$treated - sM_vill_treat_wide$control
 
+g_diff <- 
+  ggplot(data = sM_vill_treat_wide,
+         aes(x = year_month,
+             y = diff,
+             group = 1)) +
+    geom_line(col = "orangered") +
+    geom_hline(yintercept = 0) + 
+    annotate(geom="text", x=35, y=0.2, label="On average, \n0.5% superior", size = 3.5) + 
+    annotate(geom="text", x=4, y=0.3, label="Connected") + 
+    annotate(geom="text", x=3.4, y=-0.22, label="Isolated") + 
+    
+    theme_minimal() +
+    labs(title="Number of transacions - Difference between \nconnected and isolated villages",
+         x ="", 
+         y = "Absolute difference",
+         color = "") +
+    theme(axis.text.x = element_text(angle = 320, hjust=0, vjust = 1)) + 
+    scale_x_discrete(breaks=time_breaks) 
 
-ggplot(data = sM_vill_treat_wide,
-       aes(x = year_month,
-           y = diff,
-           group = 1)) +
-  geom_line(col = "orangered") +
-  geom_hline(yintercept = 0) + 
-  annotate(geom="text", x=35, y=0.2, label="On average, \n0.5% superior", size = 3.5) + 
-  annotate(geom="text", x=4, y=0.3, label="Connected") + 
-  annotate(geom="text", x=3.4, y=-0.22, label="Isolated") + 
-  
-  theme_minimal() +
-  labs(title="Number of transacions - Difference between \nconnected and isolated villages",
-       x ="", 
-       y = "Absolute difference",
-       color = "") +
-  theme(axis.text.x = element_text(angle = 320, hjust=0, vjust = 1)) + 
-  scale_x_discrete(breaks=time_breaks) +
-  
-  ggsave(file.path(OUT_graphs, "Cadaster/Ntransactions_diff_isolatedVconnected.png"),
-         device = "png")
 
+if (EXPORT_cad_graphs){
+  g_diff+
+    ggsave(file.path(OUT_graphs, "Cadaster/Ntransactions_diff_isolatedVconnected.png"),
+           device = "png")
+}
