@@ -249,10 +249,21 @@ cad_area <- aggregate(SHAPE_area ~ vill_code_str,
                       na.action=NULL,
                       data = cad1km)
 
+cad_price <- aggregate(price ~ vill_code_str,
+                       FUN = function(x) mean(x, na.rm = T),
+                      
+                       #na.rm = T,
+                       na.action=NULL,
+                       data = cad1km)
+
+cad_price$price$price[is.nan(cad_price$price)] <- NA
+
 
 cad1km_vill$area_m <- cad_area$SHAPE_area
 
 cad1km_vill$area <- cad1km_vill$area_m/1000000
+
+cad1km_vill$price <- cad_price$price
 
 
 
@@ -340,7 +351,8 @@ reg2_l <- felm(inv_hsine(sell) ~ treated + area | 0 | 0 | vill_code_str,
 # reg2_rw <- felm(sell ~ treated + area | 0 | 0 | vill_code_str,
 #              data = rwa_regData )
 
-
+foo <- felm(inv_hsine(price) ~ treated + area | 0 | 0 | vill_code_str,
+               data = villData_reg )
 
 reg1km_cad_tex <- 
   stargazer(reg1,
