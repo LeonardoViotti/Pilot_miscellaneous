@@ -89,7 +89,7 @@
   
   EC_data <- file.path(RFR, "data/admin/Establishment_census_data")
   RFR_shapeFiles <- file.path(RFR, "data/gis/Shapefiles")
-  LVTP_shapeFiles <- file.path(LVTP, "data/corridor shapefile")
+  LVTP_shapeFiles <- file.path(LVTP, "data/GIS/corridor shapefile")
   
   RFR_data <- file.path(RFR, "data")
   LVTP_data <- file.path(LVTP, "data")
