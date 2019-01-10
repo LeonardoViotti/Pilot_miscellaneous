@@ -23,11 +23,31 @@ sys.stdout.flush()
 #### Globals
 #----------------------------------------------------------------------------#
 
-w_cycle_dur = 3
-b_cycle_dur = 1
+#### Cycle time
+Wcy_dur = 2 # Work
+Bcy_dur = 1 # Break
+LBcy_dur = 2 # Long break
 
-time_0 = dt.now()
-time_i = dt.now()
+#### Messages
+Wcy_mes1 = "Work cycle finished! Have a break."
+Wcy_mes2 = "Last work cycle finished! Long break now."
+Bcy_mes = "Break finished. Go back to work!"
+LBcy_mes = "Full cycle finished!"
+
+#### Acceptable answers
+start_ansY = ["Y", "y", "Yes", "yes", "Oui", "oui", "Sim", "sim", "si", "Si", "yeah"]
+start_ansN = ["N", "n", "No", "no", "Nao", "nao", "nop", "not"]
+
+start_ansYN = start_ansY + start_ansN
+
+
+#### Subcycle function (in seconds replace with minutes)
+def subcycle(dur, message):
+		t0 = dt.now()
+		ti = dt.now()
+		while ti < t0 + td(seconds=dur):
+			ti = dt.now()
+		print(message)
 
 
 #----------------------------------------------------------------------------#
@@ -35,48 +55,31 @@ time_i = dt.now()
 #----------------------------------------------------------------------------#
 
 start_gb = input('Shall we start working? (Y/n) ')
-pause_gb = ''
 
-if start_gb == 'Y':
+while start_gb not in start_ansYN:
+	print("Sorry, I didn't get that.")
+	start_gb = input('Shall we start working now? (Y/n) ')
+	
+if start_gb in start_ansY:
 	print("Start working!")
-
+	
+	# Repeat work subcycle and break 3x
 	for i in range(0,3):
 		# Work cycle
-		time_0 = dt.now()
-		time_i = dt.now()
-		while time_i < time_0 + td(seconds=w_cycle_dur):
-			#print(timei)
-			time_i = dt.now()
-			#pause_gb = input('Type 'pause' if you want to pause')
-		print("Work cycle finished! Have a break.")
-		
-		# Break cycle
-		#time.sleep(1)
-		time_0 = dt.now()
-		time_i = dt.now()
-		while time_i < time_0 + td(seconds=b_cycle_dur):
-			#print(timei)
-			time_i = dt.now()
-		print("Break finished. Go back to work!")
+		subcycle(Wcy_dur, Wcy_mes1)
 
-		time.sleep(1)
+		# Break cycle
+		subcycle(Bcy_dur, Bcy_mes)
+
 
 	# Last work cycle before long break
-	time_0 = dt.now()
-	time_i = dt.now()	
-	while time_i < time_0 + td(seconds=w_cycle_dur):
-		#print(timei)
-		time_i = dt.now()
-	print("Last work cycle finished! Long break now.")
+	subcycle(Wcy_dur, Wcy_mes2)
 
 	# Long break!
-	time_0 = dt.now()
-	time_i = dt.now()	
-	while time_i < time_0 + td(seconds= 4*b_cycle_dur):
-		#print(timei)
-		time_i = dt.now()
-	print("Full cycle finished!")
-
+	subcycle(LBcy_dur, LBcy_mes)
+	
 else:
 	print("Ok, have fun!")
-	time.sleep(2)
+	time.sleep(1)
+
+
