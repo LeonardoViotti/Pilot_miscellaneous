@@ -35,8 +35,8 @@ Bcy_mes = "Break finished. Go back to work!"
 LBcy_mes = "Full cycle finished!"
 
 #### Acceptable answers
-start_ansY = ["Y", "y", "Yes", "yes", "Oui", "oui", "Sim", "sim", "si", "Si", "yeah"]
-start_ansN = ["N", "n", "No", "no", "Nao", "nao", "nop", "not"]
+start_ansY = ["y", "yes", "oui", "sim", "si", "yeah"]
+start_ansN = ["n",  "no", "nao", "nop", "not"]
 
 start_ansYN = start_ansY + start_ansN
 
@@ -54,7 +54,7 @@ def subcycle(dur, message):
 #### Work cycle
 #----------------------------------------------------------------------------#
 
-start_gb = input('Shall we start working? (Y/n) ')
+start_gb = input('Shall we start working? (Y/n) ').strip().lower()
 
 while start_gb not in start_ansYN:
 	print("Sorry, I didn't get that.")

@@ -12,3 +12,5 @@ def check():
 Thread(target = check).start()
 
 answer = input("Input something: ")
+
+print("deu certo")
