@@ -30,7 +30,8 @@ drop on_target on_target_sr on_target_vr lag1_on_target dist_target_vd  		///
 lag12_dist_target_vd dist_target_vr lag12_dist_target_vr dist_target_sr 		///
 lag12_dist_target_sr violent_death_sim_cum vehicle_robbery_cum 					///
 street_robbery_cum violent_death_sim_cum2 on_target_vd  vehicle_robbery_cum2 	///
-street_robbery_cum2  target_vd_cum
+street_robbery_cum2  target_vd_cum target_vr_cum target_sr_cum					///
+target_vd_sem target_vr_sem target_sr_sem
 
 
 * Replace targets with placebos it between 2006 and 1 2009 
@@ -107,17 +108,18 @@ label var cycle "Indicator for the month"
  
 
 *****************************************************************************************************************
-* REGRESSIONS
+* REGRESSIONS	
 ***************************************************************************************************************** 
  
+ xtset aisp month_year
  order aisp year month semester month_year sem_year cycle violent_death homicide violent_death_sim  police_killing body_found robbery theft street_robbery vehicle_robbery vehicle_theft cargo_robbery other_robberies drug_seizure gun_seizure arrest juvenile_arrest target_vd target_sr target_vr 
 
  
 * Quasi-placebo regressions
-// From second semester of 2015 to 2018, the city stopped paying the prizes
+// From 2016 to 2018, the city stopped paying the prizes
  
 preserve
-	keep if (year > 2015 | (year == 2015 & month > 5))
+	keep if year > 2015 
 
 	
 	foreach y of varlist  violent_death_sim  vehicle_robbery  street_robbery homicide dpolice_killing {
@@ -125,12 +127,7 @@ preserve
 		sum `y' 
 		eret2 scalar mean_y=r(mean)
 		eret2 scalar adj_R2=e(r2_a)
-		outreg2 using Results\placebo_tab3.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 )
-	xi: xtreg  `y'  on_target n_precinct population i.month i.year i.id_cmt,  fe 
-		sum `y' 
-		eret2 scalar mean_y=r(mean)
-		eret2 scalar adj_R2=e(r2_a)	
-		outreg2 using Results\placebo_tab3.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 )
+		outreg2 using $dir\Results\placebo_pos.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 )
 	}
 	
 	
@@ -144,8 +141,8 @@ preserve
 	keep if year > 2006 & year < 2009 
 
 
-	xtreg violent_death_sim  on_target n_precinct population i.month i.year,  fe 
-	xtreg violent_death_sim  on_target n_precinct population i.month i.year i.id_cmt
+	//xtreg violent_death_sim  on_target n_precinct population i.month i.year,  fe 
+	//xtreg violent_death_sim  on_target n_precinct population i.month i.year i.id_cmt
 	 
 	*Placebo Table 2
 
@@ -154,12 +151,12 @@ preserve
 		sum `y' 
 		eret2 scalar mean_y=r(mean)
 		eret2 scalar adj_R2=e(r2_a)
-		outreg2 using Results\placebo_tab3.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 )
+		outreg2 using $dir\Results\placebo_pre.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 )
 	xi: xtreg  `y'  on_target n_precinct population i.month i.year i.id_cmt,  fe 
 		sum `y' 
 		eret2 scalar mean_y=r(mean)
 		eret2 scalar adj_R2=e(r2_a)	
-		outreg2 using Results\placebo_tab3.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 )
+		outreg2 using $dir\Results\placebo_pre.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 )
 	}
 
 restore 
