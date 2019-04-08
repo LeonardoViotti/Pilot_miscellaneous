@@ -6,26 +6,11 @@
 
 
 #------------------------------------------------------------------------------#
-#### Paths ####
-
-DROPBOX <- "C:/Users/WB519128/Dropbox/Work/WB/RJ - Pavuna"
-GITHUB <- "C:/Users/WB519128/Documents/GitHub/Pilot_miscellaneous"
-
-DATA <- file.path(DROPBOX, "Data")
-RAIS <- file.path(DATA, "RAIS/RAW")
-
-
-#------------------------------------------------------------------------------#
-#### Packages ####
-
-library(data.table)
-
-#------------------------------------------------------------------------------#
 #### Load data ####
 
-rais <- fread(file.path(RAIS,"RJ2016.csv"), header = T)
-#rais <- read.csv(file.path(RAIS,"RJ2016.csv"), header = T)
+#rais <- fread(file.path(RAIS,"RJ2016.csv"), header = T)
 
+rais <- readRDS(file.path(RAIS_did, "RJ2017did.rds"))
 
 
 #------------------------------------------------------------------------------#
