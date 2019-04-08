@@ -62,25 +62,23 @@ foreach x of varlist target_vd  target_sr  target_vr {
 }
 
 * Actually create treatment vars
-gen 	on_target_vd=(violent_death_sim_cum<=vd_placebo_tar_cum) if year<=2012
-replace on_target_vd=(violent_death_sim_cum<=vd_placebo_tar_cum*1.1) if year>=2013
+gen 	on_target_vd=(violent_death_sim_cum<=target_vd_cum) 
+replace on_target_vd=(violent_death_sim_cum<=target_vd_cum*1.1) if year>=2013
 replace on_target_vd=. if cycle==1
 
-gen 	on_target_sr=(street_robbery_cum<=sr_placebo_tar_cum)
-replace on_target_sr=(street_robbery_cum<=sr_placebo_tar_cum*1.1) if year>=2013
-replace on_target_sr=. if cycle==1
+gen 	on_target_sr=(street_robbery_cum<=target_sr_cum)
+replace on_target_sr=(street_robbery_cum<=target_sr_cum*1.1) if year>=2013
 
-gen 	on_target_vr=(vehicle_robbery_cum<=vr_placebo_tar_cum)
-replace on_target_vr=(vehicle_robbery_cum<=vr_placebo_tar_cum*1.1) if year>=2013
-replace on_target_vr=. if cycle==1 
+gen 	on_target_vr=(vehicle_robbery_cum<=target_vr_cum)
+replace on_target_vr=(vehicle_robbery_cum<=target_vr_cum*1.1) if year>=2013
 
 gen 	on_target= (on_target_vd==1 & on_target_sr==1 & on_target_vr==1)
-replace on_target=. if cycle==1
 
 sort aisp month_year 
 gen lag1_on_target=on_target[_n-1]
 
 
+* Distance variable
 gen dist_target_vd=violent_death_sim_cum /target_vd_sem -1 
 bysort aisp (month_year): gen lag12_dist_target_vd=dist_target_vd[_n-12]
 
