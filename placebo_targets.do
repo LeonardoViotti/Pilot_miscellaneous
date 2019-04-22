@@ -90,7 +90,6 @@ gen dist_target_sr=street_robbery_cum /target_sr_sem -1
 bysort aisp (month_year): gen lag12_dist_target_sr=dist_target_sr[_n-12]
 
 
-
 foreach x of varlist target_vd  {
 label var `x' "violent death target (month)"
 label var `x'_sem "violent death target (semester)"
@@ -124,10 +123,23 @@ preserve
 	
 	foreach y of varlist  violent_death_sim  vehicle_robbery  street_robbery homicide dpolice_killing {
 	xi: xtreg `y'  on_target  n_precinct population i.month i.year ,  fe 
-		sum `y' 
+		sum `y' if e(sample)==1
 		eret2 scalar mean_y=r(mean)
 		eret2 scalar adj_R2=e(r2_a)
 		outreg2 using $dir\Results\placebo_pos.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 )
+	xi: xtreg `y'  on_target  n_precinct population i.month i.year i.cmt ,  fe 
+		sum `y' if e(sample)==1
+		eret2 scalar mean_y=r(mean)
+		eret2 scalar adj_R2=e(r2_a)
+		outreg2 using $dir\Results\placebo_pos.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 )
+		
+	// IV only for 2017 and 2018	
+	xi: xtivreg `y' ( on_target =lag12_dist_target_vr lag12_dist_target_sr lag12_dist_target_vd  )n_precinct  population i.month i.year i.cmt if year > 2016 ,  fe 
+		sum `y' if e(sample)==1
+		eret2 scalar mean_y=r(mean)
+		eret2 scalar adj_R2=e(r2_a)	
+		eret2 scalar F_test=e(F_f)
+		outreg2 using $dir\Results\placebo_pos_IV.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 F_test)
 	}
 	
 	
@@ -148,15 +160,23 @@ preserve
 
 	foreach y of varlist  violent_death_sim  vehicle_robbery  street_robbery homicide dpolice_killing {
 	xi: xtreg `y'  on_target  n_precinct population i.month i.year ,  fe 
-		sum `y' 
+		sum `y' if e(sample)==1
 		eret2 scalar mean_y=r(mean)
 		eret2 scalar adj_R2=e(r2_a)
 		outreg2 using $dir\Results\placebo_pre.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 )
 	xi: xtreg  `y'  on_target n_precinct population i.month i.year i.id_cmt,  fe 
-		sum `y' 
+		sum `y' if e(sample)==1
 		eret2 scalar mean_y=r(mean)
 		eret2 scalar adj_R2=e(r2_a)	
 		outreg2 using $dir\Results\placebo_pre.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 )
+	
+	// IV only for 2008	
+	xi: xtivreg `y' ( on_target =lag12_dist_target_vr lag12_dist_target_sr lag12_dist_target_vd  )n_precinct  population i.month i.year i.cmt if year == 2008 ,  fe 
+		sum `y' if e(sample)==1
+		eret2 scalar mean_y=r(mean)
+		eret2 scalar adj_R2=e(r2_a)	
+		eret2 scalar F_test=e(F_f)
+		outreg2 using $dir\Results\placebo_pre_IV.xls, keep(on_target) dec(3) nocons  aster(se) e(mean_y adj_R2 F_test)
 	}
 
 restore 
