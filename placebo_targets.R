@@ -21,7 +21,6 @@ library(openxlsx)
 setwd("C:/Users/wb519128/Dropbox/Work/Insper/PMRJ")
 sim <- read.dta13("data_SIM_2019-01.dta", convert.factors = F)
 
-
 sim <- sim[!is.na(sim$aisp) & !is.na(sim$year) & !is.na(sim$month), ]
 
 
@@ -40,6 +39,23 @@ ntar <- ntar %>%
 
 
 #------------------------------------------------------------------------------#
+#### Load commander data ####
+
+com <- read.csv("ComandantesBatalhao.csv", header = T, sep = ";")
+
+
+# Create commander ID
+
+com$nome_comandante_bpm <- gsub("TEN ", "", com$nome_comandante_bpm)
+com$nome_comandante_bpm <- gsub("CEL ", "", com$nome_comandante_bpm)
+
+com <- com %>% 
+  rename(year = vano,
+         month = mes,
+         cmt = nome_comandante_bpm)
+
+
+#------------------------------------------------------------------------------#
 #### Merge data ####
 
 # Since there are already rows with the same aisps, year and months in sim,
@@ -48,10 +64,23 @@ ntar <- ntar %>%
 
 nsim <- 
   union_all(
-    inner_join( select(sim, -c("target_vd", "target_vr", "target_sr")), ntar , by = c("aisp", "year", "month") ), # rows fromsim  with matches in ntar
-    anti_join( sim ,  ntar[c("aisp", "year", "month")] ) # rows without matching
+    inner_join( select(sim, -c("target_vd", 
+                               "target_vr", 
+                               "target_sr")), 
+                ntar , 
+                by = c("aisp",
+                       "year", 
+                       "month") ), # rows from sim  with matches in ntar
+    anti_join( sim ,  
+               ntar[c("aisp", 
+                      "year", 
+                      "month")] ) # rows without matching
   ) %>% 
   arrange(aisp, year, month)
+
+
+# add Commanders names
+nsim <- merge(nsim, com, by = c("aisp", "month", "year"), all.x = T)
 
 
 #------------------------------------------------------------------------------#
