@@ -3,13 +3,13 @@
 *****************************************************************************************************************
 * REGRESSIONS
 *****************************************************************************************************************
-cd  "/Users/joanacmm/Dropbox/AvaliacaoSIM
+cd  "C:\Users\wb519128\Dropbox\Work\Insper\PMRJ"
 
  use data_SIM_2019-01.dta, clear
 
 *Table 1
 
-sum  violent_death_sim vehicle_robbery  street_robbery lag_dist_target_vd  lag_dist_target_vr lag_dist_target_sr police_killing  other_robberies cargo_robbery burglary store_robbery   vehicle_theft street_theft  body_found   drug_seizure gun_seizure arrest2  max_prize population  policemen_aisp policemen_upp  exp_similar  exper_cmt_total on_target_vd on_target_vr on_target_sr on_target if cycle~=1 & sem_year>100
+//sum  violent_death_sim vehicle_robbery  street_robbery lag_dist_target_vd  lag_dist_target_vr lag_dist_target_sr police_killing  other_robberies cargo_robbery burglary store_robbery   vehicle_theft street_theft  body_found   drug_seizure gun_seizure arrest2  max_prize population  policemen_aisp policemen_upp  exp_similar  exper_cmt_total on_target_vd on_target_vr on_target_sr on_target if cycle~=1 & sem_year>100
 
 *Table 2
 
@@ -146,7 +146,7 @@ foreach y of varlist  violent_death_sim  vehicle_robbery  street_robbery homicid
 *****************************************************************************************************************
 * GRAPHS
 *****************************************************************************************************************
-
+/*
 
 egen mean_on_target=mean(on_target), by(cycle )
 twoway ( line mean_on_target cycle, sort  ytitle("Share of police units that are on target") xtitle("") )
@@ -184,4 +184,7 @@ bysort aisp (year): gen dt_`x'= `x'- (`x'[_n-12]+`x'[_n-24]+`x'[_n-36])/3
  graph box lag_dist_target_vr, noout
 
 *Problema na base
- br aisp year month vehicle_robbery  vehicle_robbery_cum target_vr_sem dist_target_vr if dist_target_vr>1000 & dist_target_vr!=.
+ br aisp year month vehicle_robbery  vehicle_robbery_cum target_vr_sem dist_target_vr if dist_target_vr>1000 & dist_target_vr!=. 
+ 
+ 
+ */
