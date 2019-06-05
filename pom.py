@@ -1,7 +1,7 @@
-#----------------------------------------------------------------------------#
+	#----------------------------------------------------------------------------#
 #
 # 						Pomodoro timer draft
-# 					
+#
 #----------------------------------------------------------------------------#
 
 
@@ -12,6 +12,7 @@
 #### Import Libraries
 import time
 import sys
+#import os
 
 from datetime import datetime  as dt
 from datetime import timedelta as td
@@ -48,6 +49,7 @@ def subcycle(dur, message):
 		while ti < t0 + td(seconds=dur):
 			ti = dt.now()
 		print(message)
+		#os.system("beep -f 555 -l 460")
 
 
 #----------------------------------------------------------------------------#
@@ -59,10 +61,10 @@ start_gb = input('Shall we start working? (Y/n) ').strip().lower()
 while start_gb not in start_ansYN:
 	print("Sorry, I didn't get that.")
 	start_gb = input('Shall we start working now? (Y/n) ')
-	
+
 if start_gb in start_ansY:
 	print("Start working!")
-	
+
 	# Repeat work subcycle and break 3x
 	for i in range(0,3):
 		# Work cycle
@@ -77,9 +79,7 @@ if start_gb in start_ansY:
 
 	# Long break!
 	subcycle(LBcy_dur, LBcy_mes)
-	
+
 else:
 	print("Ok, have fun!")
 	time.sleep(1)
-
-
