@@ -17,28 +17,22 @@ import numpy as np
 os.chdir("C:/Users/wb519128/Desktop")
 
 file = open("tf_rf.txt", "r") 
-rf = [line.split(' ') for line in file.readlines()] # Turn into List
-# raw = file.read()
+raw = file.read()
 # Good practice to close the file to avoid curruption
 file.close()
-
-# tokens = word_tokenize(raw)
 
 #--------------------------------------------------------------------
 # Processing
 
+# Not sure if this is a good idea since a lot of these are tables, but
+# it is the easiest way to start
+tokens = word_tokenize(raw)
 
 
+# Remove parenthesis
+list(filter(lambda s: s not in [")", '('], tokens))
 
-# Flaten the list
-rf = [j for sub in rf for j in sub]
+#--------------------------------------------------------------------
+# Foo
 
-# Remove line breaks and white space stuff
-rf = [s.strip('\n') for s in rf]
-rf = [s.strip('\x0c') for s in rf]
-rf = [s.strip('(') for s in rf]
-rf = [s.strip(')') for s in rf]
 
-# Remove white space - not sure if this is a good idea, but is the simplest
-# way I can think of processing this for now
-rf = list(filter(lambda s: s != '', rf))
