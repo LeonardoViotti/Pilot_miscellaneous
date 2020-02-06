@@ -16,20 +16,20 @@ site = 'https://p7p.worldbank.org/webdynpro/dispatcher/worldbank.org/tfp_summary
 # Driver
 
 # Open IE
+# WARNING: Need to select "Enable Protected Mode" for all zones in Tools> Internet Options > Security
+
 driver = webdriver.Ie()
 
 # Get TFP website
 driver.get(site)
 
-
-# Click on link
-#tf = driver.find_element_by_class_name('urLnkTxtStd')
-
-
+# Click on TF number
 # These elements go from ...Tfp_No_editor.0 to ...Tfp_No_editor.X
 tf = driver.find_element_by_xpath("//A[@id='PKNP.SummaryView.Tfp_No_editor.2']/SPAN")
 tf.click()
 
 # Click "TF Details" tab
-#tab = driver.find_element_by_link_text('https://p7p.worldbank.org/webdynpro/resources/worldbank.org/tfp_tabs_adm/Components/worldbank.org.TFP_Tabs_ADM/Tab_TF_Details.png')
-#tab.click()
+details_tab = driver.find_element_by_xpath("//A[@id='PKNPMJJN.TabsView.TF_Details_Tab_LTA']")
+details_tab.click()
+
+
